@@ -1,6 +1,8 @@
 package com.gyan.msdesign.service;
 
 import com.gyan.msdesign.entity.CurrencyConversion;
+import com.gyan.msdesign.proxy.CurrencyExchangeProxy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +13,8 @@ import java.util.HashMap;
 @Service
 public class CurrencyConversionService {
 
+    @Autowired
+    private CurrencyExchangeProxy proxy;
 
     public CurrencyConversion calculateCurrencyConversion(String from, String to, BigDecimal quantity){
         HashMap<String,String> uriVariables = new HashMap<>();
@@ -29,7 +33,23 @@ public class CurrencyConversionService {
                 quantity,
                 currencyConversion.getConversionMultiple(),
                 quantity.multiply(currencyConversion.getConversionMultiple()),
-                currencyConversion.getEnvironment());
+                currencyConversion.getEnvironment()+" rest template");
+
+    }
+
+    public CurrencyConversion calculateCurrencyConversionFeign(String from, String to, BigDecimal quantity){
+
+
+        CurrencyConversion currencyConversion =   proxy.retrieveCurrencyExchange(from,to);
+
+        return   new CurrencyConversion(currencyConversion.getId(),
+                from,
+                to,
+                quantity,
+                currencyConversion.getConversionMultiple(),
+                quantity.multiply(currencyConversion.getConversionMultiple()),
+                currencyConversion.getEnvironment()+" feign");
+
 
     }
 }
